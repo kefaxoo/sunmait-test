@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct NewsItemView: View {
+    let news: News
+    
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
@@ -22,22 +24,24 @@ struct NewsItemView: View {
                 }
                 .frame(width: 94, height: 86)
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Street Art Festival Transforms City Walls")
+                    Text(self.news.webTitle)
                         .foregroundStyle(.customBlack)
                         .lineLimit(3)
                         .font(.system(size: 17, weight: .bold))
                     HStack {
-                        Text("Art")
+                        Text(self.news.pillarName)
                             .foregroundStyle(.customGray)
                             .lineLimit(1)
                             .font(.system(size: 15, weight: .medium))
-                        RoundedRectangle(cornerRadius: 2)
-                            .foregroundStyle(.customGray)
-                            .frame(width: 4, height: 4)
-                        Text("Apr 17,2025")
-                            .foregroundStyle(.customGray)
-                            .lineLimit(1)
-                            .font(.system(size: 15, weight: .medium))
+                        if let date = self.news.dateString {
+                            RoundedRectangle(cornerRadius: 2)
+                                .foregroundStyle(.customGray)
+                                .frame(width: 4, height: 4)
+                            Text(date)
+                                .foregroundStyle(.customGray)
+                                .lineLimit(1)
+                                .font(.system(size: 15, weight: .medium))
+                        }
                     }
                     Spacer()
                 }
@@ -56,6 +60,13 @@ struct NewsItemView: View {
                 .padding(.leading, 16)
             }
             .padding(12)
+        }
+        .onTapGesture {
+            guard let url = URL(string: self.news.webUrl),
+                  UIApplication.shared.canOpenURL(url)
+            else { return }
+            
+            UIApplication.shared.open(url)
         }
     }
 }
