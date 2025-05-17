@@ -16,8 +16,8 @@ struct NewsResponseInfo: Decodable {
     let pages: Int
     let results: [News]
     
-    var canPaggiate: Bool {
-        self.currentPage + 1 >= self.pages
+    var canPaginate: Bool {
+        self.currentPage + 1 <= self.pages
     }
 }
 

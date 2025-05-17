@@ -101,5 +101,6 @@ struct NavigationBlockView: View {
             .padding(.leading, 16)
             .padding(.trailing, 17)
         }
+        .padding(.horizontal, 16)
     }
 }

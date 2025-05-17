@@ -19,7 +19,7 @@ struct sunmait_testApp: App {
     
     var body: some Scene {
         WindowGroup {
-            NewsView()
+            MainView()
         }
     }
 }

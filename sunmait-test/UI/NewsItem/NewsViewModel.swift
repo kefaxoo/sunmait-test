@@ -9,16 +9,22 @@ import Foundation
 
 final class NewsViewModel: ObservableObject {
     var navigationBlocks = [NavigationBlock]()
-    var news = [News]()
+    
+    @Published var content = [News]()
     
     @Published var hasError = false
     @Published var totalRows = 0
     @Published var isLoadingMore = false
+    @Published var isRefreshing = false
+    @Published var isLoading = false
     
     private var currentPage = 0
-    private var canPagginate = false
+    private var canPaginate = false
+    
+    private var news = [News]()
     
     init() {
+        self.isLoading = true
         let dispatchGroup = DispatchGroup()
         
         dispatchGroup.enter()
@@ -43,7 +49,7 @@ final class NewsViewModel: ObservableObject {
                 case .success(let response):
                     self?.news = response.results
                     self?.currentPage = response.currentPage
-                    self?.canPagginate = response.canPaggiate
+                    self?.canPaginate = response.canPaginate
                     dispatchGroup.leave()
                 case .failure(let error):
                     self?.parseNewsError(error)
@@ -52,6 +58,7 @@ final class NewsViewModel: ObservableObject {
         
         dispatchGroup.notify(queue: .main) { [weak self] in
             self?.countRowCount()
+            self?.isLoading = false
         }
     }
     
@@ -63,13 +70,25 @@ final class NewsViewModel: ObservableObject {
     private func countRowCount() {
         self.totalRows = self.news.count + self.news.count / 2
     }
+    
+    private func setNewNews(_ response: NewsResponseInfo, reset: Bool = true) {
+        if reset {
+            self.news = response.results
+        } else {
+            self.news += response.results
+        }
+        
+        self.currentPage = response.currentPage
+        self.canPaginate = response.canPaginate
+        self.countRowCount()
+    }
 }
 
-// MARK: - Pagginate
+// MARK: - Paginate
 extension NewsViewModel {
     func loadMore() {
         guard !self.isLoadingMore,
-              self.canPagginate
+              self.canPaginate
         else { return }
         
         self.isLoadingMore = true
@@ -77,10 +96,7 @@ extension NewsViewModel {
             self?.isLoadingMore = false
             switch result {
                 case .success(let response):
-                    self?.news += response.results
-                    self?.currentPage = response.currentPage
-                    self?.canPagginate = response.canPaggiate
-                    self?.countRowCount()
+                    self?.setNewNews(response, reset: false)
                 case .failure(let error):
                     self?.parseNewsError(error)
             }
@@ -89,9 +105,43 @@ extension NewsViewModel {
     
     private func parseNewsError(_ error: any Error) {
         if let testError = error as? TestError {
-            self.canPagginate = testError.reason == "Content API does not support paging this far. Please change page or page-size or consider filtering using a date range."
+            self.canPaginate = testError.reason == "Content API does not support paging this far. Please change page or page-size or consider filtering using a date range."
         } else {
             self.hasError = true
+        }
+    }
+}
+
+// MARK: - Refresh
+extension NewsViewModel {
+    func refresh() async {
+        guard !self.isRefreshing else { return }
+        
+        self.isRefreshing = true
+        
+        await withCheckedContinuation { continuation in
+            TestAPIService.shared.news { [weak self] result in
+                self?.isRefreshing = false
+                continuation.resume()
+                switch result {
+                    case .success(let response):
+                        self?.setNewNews(response)
+                    case .failure(let error):
+                        self?.parseNewsError(error)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Change selection
+extension NewsViewModel {
+    func changeSelection(index: Int) {
+        switch NewsContentType.allCases[index] {
+            case .all:
+                self.content = self.news
+            default:
+                break
         }
     }
 }

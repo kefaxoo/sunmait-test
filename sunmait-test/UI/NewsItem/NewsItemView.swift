@@ -10,6 +10,8 @@ import SwiftUI
 struct NewsItemView: View {
     let news: News
     
+//    @Binding var showBlockAlert: Bool
+    
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
@@ -48,19 +50,30 @@ struct NewsItemView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.leading, 8)
                 VStack {
-                    Button {
-                        print("Button did tap")
+                    Menu {
+                        Button {
+                            
+                        } label: {
+                            Label("Add to Favorites", systemImage: "heart")
+                        }
+                        Button(role: .destructive) {
+//                            self.showBlockAlert = true
+                        } label: {
+                            Label("Block", systemImage: "nosign")
+                        }
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                            .font(.system(size: 20, weight: .light))
                             .foregroundStyle(.customGray)
                     }
-                    .frame(width: 24, height: 24)
+
                     Spacer()
                 }
                 .padding(.leading, 16)
             }
             .padding(12)
         }
+        .padding(.horizontal, 16)
         .onTapGesture {
             guard let url = URL(string: self.news.webUrl),
                   UIApplication.shared.canOpenURL(url)
