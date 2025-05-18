@@ -7,8 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		834E3C902DDA8614006ACB27 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = 8397E10E2DD9FD9400B75153 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		8397E10F2DD9FD9400B75153 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 8397E10E2DD9FD9400B75153 /* RealmSwift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		834E3C912DDA8614006ACB27 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				834E3C902DDA8614006ACB27 /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		83894F4B2DD7F5590009C79C /* sunmait-test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "sunmait-test.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -60,6 +75,7 @@
 				83894F472DD7F5590009C79C /* Sources */,
 				83894F482DD7F5590009C79C /* Frameworks */,
 				83894F492DD7F5590009C79C /* Resources */,
+				834E3C912DDA8614006ACB27 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -270,6 +286,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 16;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -303,6 +320,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 16;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

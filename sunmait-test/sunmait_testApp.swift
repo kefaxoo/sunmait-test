@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct sunmait_testApp: App {
     init() {
+        NetworkManager.shared.startMonitoring()
         UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: UIColor.customBlack]
         UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: UIColor.customBlack]
         

@@ -43,6 +43,8 @@ extension NewsViewModel {
         
         TestAPIService.shared.navigationBlocks { [weak self] result in
             dispatchGroup.leave()
+            guard NetworkManager.shared.isConnected else { return }
+            
             switch result {
                 case .success(let navigationBlocks):
                     guard navigationBlocks.count == 3 else {
@@ -60,6 +62,8 @@ extension NewsViewModel {
         dispatchGroup.enter()
         TestAPIService.shared.news { [weak self] result in
             dispatchGroup.leave()
+            guard NetworkManager.shared.isConnected else { return }
+            
             switch result {
                 case .success(let response):
                     TestAPIService.shared.cachedNewsResponseInfo = [response]

@@ -16,6 +16,7 @@ struct MainView: View {
     @State private var showSmthWentWrongAlert = false
     @State private var showBlockAlert = false
     @State private var showUnblockAlert = false
+    @State private var showNetworkConnectionAlert = false
     
     // MARK: Initial
     @State private var initialLoading = true
@@ -27,7 +28,7 @@ struct MainView: View {
     @StateObject private var viewModel = MainViewModel()
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack {
                 if !self.initialLoading {
                     Picker("", selection: $selectedSegment) {
@@ -56,6 +57,10 @@ struct MainView: View {
             self.smthWentWrongAlert()
             self.blockNewsAlert()
             self.unblockNewsAlert()
+            self.noInternetConnectionAlert()
+        }
+        .onReceive(NetworkManager.shared.$isConnected) {
+            self.showNetworkConnectionAlert = !$0
         }
     }
 }
@@ -134,6 +139,21 @@ private extension MainView {
                     }
             }
         }.animation(.easeInOut(duration: 0.2), value: self.showUnblockAlert)
+    }
+    
+    func noInternetConnectionAlert() -> some View {
+        ZStack {
+            if self.showNetworkConnectionAlert {
+                BlurView {}
+                    .alert("No Internet Connection", isPresented: $showNetworkConnectionAlert) {
+                        Button {
+                            self.showNetworkConnectionAlert = false
+                        } label: {
+                            Text("OK")
+                        }
+                    }
+            }
+        }.animation(.easeInOut(duration: 0.2), value: self.showNetworkConnectionAlert)
     }
 }
 
