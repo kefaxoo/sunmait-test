@@ -36,7 +36,9 @@ struct MainView: View {
                 }
                 switch NewsContentType.allCases[self.selectedSegment] {
                     case .all:
-                        NewNewsView(initialLoading: $initialLoading, showSmthWentWrongAlert: $showSmthWentWrongAlert)
+                        NewsView(initialLoading: $initialLoading, showSmthWentWrongAlert: $showSmthWentWrongAlert)
+                    case .favorites:
+                        FavoritesView()
                     default:
                         Text("")
                 }
@@ -51,23 +53,14 @@ struct MainView: View {
 }
 
 // MARK: - UI
-private extension MainView {
-    func defaultProgressView(color: Color = .customGray) -> some View {
-        ProgressView()
-            .progressViewStyle(.circular)
-            .tint(color)
-            .scaleEffect(1.5)
-            .padding(.vertical, 8)
-    }
-}
-
 // MARK: Alerts
 private extension MainView {
     func loadingBlurView() -> some View {
         ZStack {
             if self.initialLoading {
                 BlurView {
-                    self.defaultProgressView(color: .white)
+                    ProgressView()
+                        .setDefaultStyle(color: .white)
                 }
             }
         }.animation(.easeInOut(duration: 0.2), value: self.initialLoading)

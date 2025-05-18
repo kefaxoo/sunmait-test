@@ -1,5 +1,5 @@
 //
-//  NewNewsView.swift
+//  NewsView.swift
 //  sunmait-test
 //
 //  Created by Bahdan Piatrouski on 17.05.25.
@@ -7,8 +7,8 @@
 
 import SwiftUI
 
-struct NewNewsView: View {
-    @StateObject private var viewModel = NewNewsViewModel()
+struct NewsView: View {
+    @StateObject private var viewModel = NewsViewModel()
     
     @Binding var initialLoading: Bool
     @Binding var showSmthWentWrongAlert: Bool
@@ -23,10 +23,12 @@ struct NewNewsView: View {
                                 if i % 3 == 2 {
                                     self.navigationBlock(for: i)
                                 } else {
-                                    NewsItemView(news: self.viewModel.news(for: i))
-                                        .onAppear {
-                                            self.pagination(displayIndex: i)
-                                        }
+                                    NewsItemView(news: self.viewModel.news(for: i), contentType: .all) {
+                                        self.viewModel.removeFavoriteNews(with: $0)
+                                    }
+                                    .onAppear {
+                                        self.pagination(displayIndex: i)
+                                    }
                                 }
                             }
                             if self.viewModel.isLoadingMore {
@@ -56,7 +58,7 @@ struct NewNewsView: View {
 
 // MARK: - UI
 // MARK: Rows
-private extension NewNewsView {
+private extension NewsView {
     func navigationBlock(for displayIndex: Int) -> some View {
         let realIndex = (displayIndex / 3) % 3
         return NavigationBlockView(navigationBlock: self.viewModel.navigationBlocks[realIndex])
@@ -67,7 +69,7 @@ private extension NewNewsView {
 }
 
 // MARK: - Pagination
-private extension NewNewsView {
+private extension NewsView {
     func pagination(displayIndex index: Int) {
         guard index >= self.viewModel.totalRows - 1 else { return }
         

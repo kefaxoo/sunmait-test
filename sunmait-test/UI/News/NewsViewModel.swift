@@ -8,70 +8,87 @@
 import Foundation
 
 final class NewsViewModel: ObservableObject {
-    var navigationBlocks = [NavigationBlock]()
-    
-    @Published var content = [News]()
-    
-    @Published var hasError = false
-    @Published var totalRows = 0
+    // MARK: - Paginate
     @Published var isLoadingMore = false
-    @Published var isRefreshing = false
-    @Published var isLoading = false
-    
     private var currentPage = 0
     private var canPaginate = false
     
-    private var news = [News]()
+    // MARK: - Refresh
+    private var isRefreshing = false
+    
+    // MARK: - Published
+    @Published var initialLoading = true
+    @Published var showSmthWentWrongAlert = false
+    
+    // MARK: - Content
+    @Published var news = [News]()
+    @Published var totalRows = 0
+    var navigationBlocks = [NavigationBlock]()
     
     init() {
-        self.isLoading = true
+        self.initialFetch()
+    }
+}
+
+// MARK: - Network
+extension NewsViewModel {
+    func initialFetch() {
         let dispatchGroup = DispatchGroup()
-        
         dispatchGroup.enter()
+        
         TestAPIService.shared.navigationBlocks { [weak self] result in
+            dispatchGroup.leave()
             switch result {
                 case .success(let navigationBlocks):
                     guard navigationBlocks.count == 3 else {
-                        self?.hasError = true
+                        self?.showSmthWentWrongAlert = true
                         return
                     }
                     
                     self?.navigationBlocks = navigationBlocks
-                    dispatchGroup.leave()
                 case .failure:
-                    self?.hasError = true
+                    self?.showSmthWentWrongAlert = true
             }
         }
         
         dispatchGroup.enter()
         TestAPIService.shared.news { [weak self] result in
+            dispatchGroup.leave()
             switch result {
                 case .success(let response):
                     self?.news = response.results
                     self?.currentPage = response.currentPage
                     self?.canPaginate = response.canPaginate
-                    dispatchGroup.leave()
                 case .failure(let error):
                     self?.parseNewsError(error)
             }
         }
         
         dispatchGroup.notify(queue: .main) { [weak self] in
-            self?.countRowCount()
-            self?.isLoading = false
+            guard let self else { return }
+            
+            self.initialLoading = false
+            if !self.news.isEmpty,
+               !self.navigationBlocks.isEmpty {
+                self.calculateRowCount()
+            }
         }
     }
     
-    func news(for displayIndex: Int) -> News {
-        let arrayIndex = displayIndex - displayIndex / 3
-        return self.news[arrayIndex]
+    private func parseNewsError(_ error: any Error) {
+        guard let testError = error as? TestError else {
+            self.showSmthWentWrongAlert = true
+            return
+        }
+        
+        if testError.reason == "Content API does not support paging this far. Please change page or page-size or consider filtering using a date range." {
+            self.canPaginate = false
+        } else {
+            self.showSmthWentWrongAlert = true
+        }
     }
     
-    private func countRowCount() {
-        self.totalRows = self.news.count + self.news.count / 2
-    }
-    
-    private func setNewNews(_ response: NewsResponseInfo, reset: Bool = true) {
+    private func setNewNews(from response: NewsResponseInfo, reset: Bool = true) {
         if reset {
             self.news = response.results
         } else {
@@ -80,13 +97,13 @@ final class NewsViewModel: ObservableObject {
         
         self.currentPage = response.currentPage
         self.canPaginate = response.canPaginate
-        self.countRowCount()
+        self.calculateRowCount()
     }
 }
 
-// MARK: - Paginate
+// MARK: Paginate
 extension NewsViewModel {
-    func loadMore() {
+    func paginate() {
         guard !self.isLoadingMore,
               self.canPaginate
         else { return }
@@ -96,23 +113,15 @@ extension NewsViewModel {
             self?.isLoadingMore = false
             switch result {
                 case .success(let response):
-                    self?.setNewNews(response, reset: false)
+                    self?.setNewNews(from: response, reset: false)
                 case .failure(let error):
                     self?.parseNewsError(error)
             }
         }
     }
-    
-    private func parseNewsError(_ error: any Error) {
-        if let testError = error as? TestError {
-            self.canPaginate = testError.reason == "Content API does not support paging this far. Please change page or page-size or consider filtering using a date range."
-        } else {
-            self.hasError = true
-        }
-    }
 }
 
-// MARK: - Refresh
+// MARK: Refresh
 extension NewsViewModel {
     func refresh() async {
         guard !self.isRefreshing else { return }
@@ -125,7 +134,7 @@ extension NewsViewModel {
                 continuation.resume()
                 switch result {
                     case .success(let response):
-                        self?.setNewNews(response)
+                        self?.setNewNews(from: response)
                     case .failure(let error):
                         self?.parseNewsError(error)
                 }
@@ -134,14 +143,18 @@ extension NewsViewModel {
     }
 }
 
-// MARK: - Change selection
+// MARK: - Content
 extension NewsViewModel {
-    func changeSelection(index: Int) {
-        switch NewsContentType.allCases[index] {
-            case .all:
-                self.content = self.news
-            default:
-                break
-        }
+    private func calculateRowCount() {
+        self.totalRows = self.news.count + self.news.count / 2
+    }
+    
+    func news(for displayIndex: Int) -> News {
+        let arrayIndex = displayIndex - displayIndex / 3
+        return self.news[arrayIndex]
+    }
+    
+    func removeFavoriteNews(with id: String) {
+        RealmManager.favorites.removeNews(with: id)
     }
 }

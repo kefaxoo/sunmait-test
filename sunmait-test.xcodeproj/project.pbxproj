@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		8397E10F2DD9FD9400B75153 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 8397E10E2DD9FD9400B75153 /* RealmSwift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		83894F4B2DD7F5590009C79C /* sunmait-test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "sunmait-test.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8397E10F2DD9FD9400B75153 /* RealmSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = "sunmait-test";
 			packageProductDependencies = (
+				8397E10E2DD9FD9400B75153 /* RealmSwift */,
 			);
 			productName = "sunmait-test";
 			productReference = 83894F4B2DD7F5590009C79C /* sunmait-test.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = 83894F422DD7F5590009C79C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8397E10D2DD9FD9400B75153 /* XCRemoteSwiftPackageReference "realm-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 83894F4C2DD7F5590009C79C /* Products */;
 			projectDirPath = "";
@@ -334,6 +343,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8397E10D2DD9FD9400B75153 /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 20.0.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8397E10E2DD9FD9400B75153 /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8397E10D2DD9FD9400B75153 /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 83894F432DD7F5590009C79C /* Project object */;
 }

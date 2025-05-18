@@ -8,9 +8,14 @@
 import SwiftUI
 
 struct NewsItemView: View {
-    let news: News
+    let news: any NewsProtocol
+    let contentType: NewsContentType
     
 //    @Binding var showBlockAlert: Bool
+    
+    var removeFavorite: ((_ id: String) -> Void)?
+    
+    @State private var id = UUID()
     
     var body: some View {
         ZStack {
@@ -51,10 +56,25 @@ struct NewsItemView: View {
                 .padding(.leading, 8)
                 VStack {
                     Menu {
-                        Button {
-                            
-                        } label: {
-                            Label("Add to Favorites", systemImage: "heart")
+                        if self.contentType != .blocked {
+                            if RealmManager.favorites.isFavorite(self.news) {
+                                Button {
+                                    self.removeFavorite?(self.news.id)
+                                    if self.contentType == .all {
+                                        self.id = UUID()
+                                    }
+                                } label: {
+                                    Label("Remove from Favorites", systemImage: "heart.slash")
+                                }
+                            } else if let news = self.news as? News {
+                                Button {
+                                    RealmManager.favorites.write(news: news) {
+                                        self.id = UUID()
+                                    }
+                                } label: {
+                                    Label("Add to Favorites", systemImage: "heart")
+                                }
+                            }
                         }
                         Button(role: .destructive) {
 //                            self.showBlockAlert = true
@@ -66,7 +86,7 @@ struct NewsItemView: View {
                             .font(.system(size: 20, weight: .light))
                             .foregroundStyle(.customGray)
                     }
-
+                    .id(self.id)
                     Spacer()
                 }
                 .padding(.leading, 16)
@@ -82,8 +102,4 @@ struct NewsItemView: View {
             UIApplication.shared.open(url)
         }
     }
-}
-
-#Preview {
-    NewsView()
 }

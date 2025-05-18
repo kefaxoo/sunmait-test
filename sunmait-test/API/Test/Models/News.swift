@@ -21,19 +21,11 @@ struct NewsResponseInfo: Decodable {
     }
 }
 
-struct News: Decodable {
-    fileprivate let webPublicationDate: String
+struct News: Decodable, NewsProtocol {
+    var webPublicationDate: String
     
-    let id: String
-    let webTitle: String
-    let webUrl: String
-    let pillarName: String
-    
-    var dateString: String? {
-        guard let date = ISO8601DateFormatter().date(from: self.webPublicationDate) else { return nil }
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMM dd, yyyy"
-        return dateFormatter.string(from: date)
-    }
+    var id: String
+    var webTitle: String
+    var webUrl: String
+    var pillarName: String
 }
