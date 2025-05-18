@@ -15,9 +15,14 @@ struct MainView: View {
     // MARK: Alerts
     @State private var showSmthWentWrongAlert = false
     @State private var showBlockAlert = false
+    @State private var showUnblockAlert = false
     
     // MARK: Initial
     @State private var initialLoading = true
+    
+    // MARK: Block News
+    @State private var shouldBlockNews = false
+    @State private var shouldUnblockNews = false
     
     @StateObject private var viewModel = MainViewModel()
     
@@ -36,11 +41,11 @@ struct MainView: View {
                 }
                 switch NewsContentType.allCases[self.selectedSegment] {
                     case .all:
-                        NewsView(initialLoading: $initialLoading, showSmthWentWrongAlert: $showSmthWentWrongAlert)
+                        NewsView(initialLoading: $initialLoading, showSmthWentWrongAlert: $showSmthWentWrongAlert, showBlockAlert: $showBlockAlert, shouldBlockNews: $shouldBlockNews)
                     case .favorites:
-                        FavoritesView()
-                    default:
-                        Text("")
+                        FavoritesView(showBlockAlert: $showBlockAlert, shouldBlockNews: $shouldBlockNews)
+                    case .blocked:
+                        BlockedView(showUnblockAlert: $showUnblockAlert, shouldUnblockNews: $shouldUnblockNews)
                 }
             }
             .background(.beige)
@@ -48,6 +53,9 @@ struct MainView: View {
         }
         .overlay {
             self.loadingBlurView()
+            self.smthWentWrongAlert()
+            self.blockNewsAlert()
+            self.unblockNewsAlert()
         }
     }
 }
@@ -79,6 +87,53 @@ private extension MainView {
                     }
             }
         }.animation(.easeInOut(duration: 0.2), value: self.initialLoading)
+    }
+    
+    func blockNewsAlert() -> some View {
+        ZStack {
+            if self.showBlockAlert {
+                BlurView {}
+                    .alert("Do you want to block?", isPresented: $showBlockAlert) {
+                        Button(role: .destructive) {
+                            self.shouldBlockNews = true
+                            self.showBlockAlert = false
+                        } label: {
+                            Text("Block")
+                        }
+                        Button(role: .cancel) {
+                            self.showBlockAlert = false
+                        } label: {
+                            Text("Cancel")
+                        }
+                    } message: {
+                        Text("Confirm to hide this news source")
+                    }
+
+            }
+        }.animation(.easeInOut(duration: 0.2), value: self.showBlockAlert)
+    }
+    
+    func unblockNewsAlert() -> some View {
+        ZStack {
+            if self.showUnblockAlert {
+                BlurView {}
+                    .alert("Do you want to unblock?", isPresented: $showUnblockAlert) {
+                        Button(role: .destructive) {
+                            self.shouldUnblockNews = true
+                            self.showUnblockAlert = false
+                        } label: {
+                            Text("Unblock")
+                        }
+                        Button(role: .cancel) {
+                            self.showUnblockAlert = false
+                        } label: {
+                            Text("Cancel")
+                        }
+                    } message: {
+                        Text("Confirm to unblock this news source")
+                    }
+            }
+        }.animation(.easeInOut(duration: 0.2), value: self.showUnblockAlert)
     }
 }
 

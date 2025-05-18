@@ -12,6 +12,10 @@ struct NewsView: View {
     
     @Binding var initialLoading: Bool
     @Binding var showSmthWentWrongAlert: Bool
+    @Binding var showBlockAlert: Bool
+    @Binding var shouldBlockNews: Bool
+    
+    @State private var blockNewsId: String?
     
     var body: some View {
         VStack {
@@ -23,7 +27,7 @@ struct NewsView: View {
                                 if i % 3 == 2 {
                                     self.navigationBlock(for: i)
                                 } else {
-                                    NewsItemView(news: self.viewModel.news(for: i), contentType: .all) {
+                                    NewsItemView(news: self.viewModel.news(for: i), contentType: .all, blockNewsId: $blockNewsId) {
                                         self.viewModel.removeFavoriteNews(with: $0)
                                     }
                                     .onAppear {
@@ -42,7 +46,9 @@ struct NewsView: View {
                     }
                 } else {
                     Spacer()
-                    NoResultsView()
+                    NoResultsView {
+                        self.viewModel.refresh()
+                    }
                     Spacer()
                 }
             }
@@ -52,6 +58,20 @@ struct NewsView: View {
         }
         .onReceive(self.viewModel.$showSmthWentWrongAlert) {
             self.showSmthWentWrongAlert = $0
+        }
+        .onChange(of: blockNewsId) { newValue in
+            guard newValue != nil else { return }
+            
+            self.showBlockAlert = true
+        }
+        .onChange(of: shouldBlockNews) { newValue in
+            guard newValue,
+                  let blockNewsId
+            else { return }
+            
+            self.viewModel.blockNews(with: blockNewsId)
+            self.blockNewsId = nil
+            self.shouldBlockNews = false
         }
     }
 }

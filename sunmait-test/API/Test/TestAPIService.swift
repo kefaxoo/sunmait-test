@@ -11,6 +11,12 @@ import Combine
 final class TestAPIService: BaseAPIService<TestAPI> {
     static let shared = TestAPIService()
     
+    var cachedNavigationBlocks = [NavigationBlock]()
+    var cachedNewsResponseInfo = [NewsResponseInfo]()
+    var hasCache: Bool {
+        !self.cachedNavigationBlocks.isEmpty && !self.cachedNewsResponseInfo.isEmpty
+    }
+    
     func navigationBlocks(completionHandler: @escaping((ResponseResult<[NavigationBlock]>) -> Void)) {
         self.dataTask(with: .navigationBlocks) { result in
             switch result {

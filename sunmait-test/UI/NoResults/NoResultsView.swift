@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct NoResultsView: View {
+    var refresh: () -> Void
+    
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
@@ -19,7 +21,7 @@ struct NoResultsView: View {
                     .padding(.top, 8)
                     .foregroundStyle(.customBlack)
                 Button {
-                    
+                    self.refresh()
                 } label: {
                     ZStack {
                         RoundedRectangle(cornerRadius: 4)

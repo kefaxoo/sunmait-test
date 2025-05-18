@@ -44,7 +44,7 @@ final class RealmManager<T> where T: Object {
         }
     }
     
-    func write(news: any NewsProtocol & Decodable, completionHandler: (() -> Void)?) where T: RealmNewsProtocol {
+    func write(news: any NewsProtocol & Decodable, completionHandler: (() -> Void)? = nil) where T: RealmNewsProtocol {
         self.write(news.toRealmObject(T.self), completionHandler: completionHandler)
     }
     

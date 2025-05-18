@@ -26,7 +26,12 @@ final class NewsViewModel: ObservableObject {
     var navigationBlocks = [NavigationBlock]()
     
     init() {
-        self.initialFetch()
+        if TestAPIService.shared.hasCache {
+            self.initialLoading = false
+            self.loadFromCache()
+        } else {
+            self.initialFetch()
+        }
     }
 }
 
@@ -45,6 +50,7 @@ extension NewsViewModel {
                         return
                     }
                     
+                    TestAPIService.shared.cachedNavigationBlocks = navigationBlocks
                     self?.navigationBlocks = navigationBlocks
                 case .failure:
                     self?.showSmthWentWrongAlert = true
@@ -56,7 +62,8 @@ extension NewsViewModel {
             dispatchGroup.leave()
             switch result {
                 case .success(let response):
-                    self?.news = response.results
+                    TestAPIService.shared.cachedNewsResponseInfo = [response]
+                    self?.news = response.results.filter({ !RealmManager.blocked.isBlocked($0) })
                     self?.currentPage = response.currentPage
                     self?.canPaginate = response.canPaginate
                 case .failure(let error):
@@ -75,6 +82,15 @@ extension NewsViewModel {
         }
     }
     
+    func loadFromCache() {
+        self.navigationBlocks = TestAPIService.shared.cachedNavigationBlocks
+        self.news = TestAPIService.shared.cachedNewsResponseInfo.reduce([], { $0 + $1.results }).filter({ !RealmManager.blocked.isBlocked($0) })
+        let lastCurrentPage = TestAPIService.shared.cachedNewsResponseInfo.compactMap({ ($0.currentPage, $0.canPaginate) }).max(by: { $0.0 > $1.0 })
+        self.currentPage = lastCurrentPage?.0 ?? 1
+        self.canPaginate = lastCurrentPage?.1 ?? true
+        self.calculateRowCount()
+    }
+    
     private func parseNewsError(_ error: any Error) {
         guard let testError = error as? TestError else {
             self.showSmthWentWrongAlert = true
@@ -89,10 +105,13 @@ extension NewsViewModel {
     }
     
     private func setNewNews(from response: NewsResponseInfo, reset: Bool = true) {
+        let news = response.results.filter({ !RealmManager.blocked.isBlocked($0) })
         if reset {
-            self.news = response.results
+            TestAPIService.shared.cachedNewsResponseInfo = [response]
+            self.news = news
         } else {
-            self.news += response.results
+            TestAPIService.shared.cachedNewsResponseInfo.append(response)
+            self.news += news
         }
         
         self.currentPage = response.currentPage
@@ -141,6 +160,14 @@ extension NewsViewModel {
             }
         }
     }
+    
+    func refresh() {
+        self.initialLoading = true
+        Task {
+            await self.refresh()
+            self.initialLoading = false
+        }
+    }
 }
 
 // MARK: - Content
@@ -156,5 +183,13 @@ extension NewsViewModel {
     
     func removeFavoriteNews(with id: String) {
         RealmManager.favorites.removeNews(with: id)
+    }
+    
+    func blockNews(with id: String) {
+        guard let news = self.news.first(where: { $0.id == id }) else { return }
+        
+        self.news.removeAll(where: { $0.id == id })
+        self.calculateRowCount()
+        RealmManager.blocked.write(news: news)
     }
 }

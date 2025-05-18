@@ -11,7 +11,8 @@ struct NewsItemView: View {
     let news: any NewsProtocol
     let contentType: NewsContentType
     
-//    @Binding var showBlockAlert: Bool
+    var blockNewsId: Binding<String?>?
+    var unblockNewsId: Binding<String?>?
     
     var removeFavorite: ((_ id: String) -> Void)?
     
@@ -76,10 +77,19 @@ struct NewsItemView: View {
                                 }
                             }
                         }
-                        Button(role: .destructive) {
-//                            self.showBlockAlert = true
-                        } label: {
-                            Label("Block", systemImage: "nosign")
+                        if RealmManager.blocked.isBlocked(self.news) {
+                            Button(role: .destructive) {
+                                self.unblockNewsId?.wrappedValue = self.news.id
+                            } label: {
+                                Label("Unblock", systemImage: "lock.open")
+                            }
+
+                        } else {
+                            Button(role: .destructive) {
+                                self.blockNewsId?.wrappedValue = self.news.id
+                            } label: {
+                                Label("Block", systemImage: "nosign")
+                            }
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
